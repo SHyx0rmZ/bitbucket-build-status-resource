@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-MAINTAINER Patrick Pokatilo <docker-hub@shyxormz.net>
+LABEL org.opencontainers.image.authors="Patrick Pokatilo <docker-hub@shyxormz.net>"
 
 ENV LANG C
 
@@ -8,6 +8,7 @@ RUN apk update --no-progress && \
     apk add --no-cache --no-progress \
         bash \
         python3 \
+        py3-pip \
         git \
         mercurial && \
     pip3 install --upgrade pip && \
