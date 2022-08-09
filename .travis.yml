@@ -1,4 +1,4 @@
-dist: xenial
+dist: focal
 language: python
 python:
   - "2.7"
@@ -10,7 +10,18 @@ services:
 
 install: "pip install -r requirements.txt"
 
+before_script:
+  - mkdir -p ~/.docker/cli-plugins
+  - wget -O - https://github.com/docker/buildx/releases/download/v0.5.1/buildx-v0.5.1.linux-amd64 > ~/.docker/cli-plugins/docker-buildx
+  - chmod a+x ~/.docker/cli-plugins/docker-buildx
+  - docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
+  - docker buildx create --use --name mybuilder
+
 script:
   - behave tests/features
   - PYTHONPATH=scripts python -m unittest discover tests
 
+  - if [[ "$TRAVIS_TAG" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
+    docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD};
+    docker buildx build --platform linux/amd64,linux/arm64 -t shyxormz/bitbucket-build-status-resource:$TRAVIS_TAG -t shyxormz/bitbucket-build-status-resource:latest --push .;
+    fi
