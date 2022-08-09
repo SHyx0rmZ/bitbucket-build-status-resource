@@ -66,7 +66,6 @@ else:
 
 if debug:
     print_error("Commit: " + str(commit_hash))
-    print_error("Environment variables: " + str(os.environ))
 
 if "build_url_file" in config["params"]:
         with open(os.path.join(sys.argv[1], config["params"]["build_url_file"]), "r") as fp:
