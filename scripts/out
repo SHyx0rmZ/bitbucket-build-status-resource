@@ -9,9 +9,9 @@ from bitbucket import BitbucketException, BitbucketCloudDriver, BitbucketServerD
 from concourse import print_error
 from helper import json_pp
 try:
-    from urllib import quote  # Python 2.X
+    from urllib import quote, urlencode  # Python 2.X
 except ImportError:
-    from urllib.parse import quote  # Python 3+
+    from urllib.parse import quote, urlencode  # Python 3+
 
 config = json.loads(sys.stdin.read())
 
@@ -66,6 +66,7 @@ else:
 
 if debug:
     print_error("Commit: " + str(commit_hash))
+    print_error("Environment variables: " + str(os.environ))
 
 if "build_url_file" in config["params"]:
         with open(os.path.join(sys.argv[1], config["params"]["build_url_file"]), "r") as fp:
@@ -83,10 +84,33 @@ else:
         build_path = 'builds/{build}'.format(
             build=os.environ['BUILD_ID']
         )
+    maybe_url_params = ''
+    if 'BUILD_PIPELINE_INSTANCE_VARS' in os.environ:
+    # If $BUILD_PIPELINE_INSTANCE_VARS is:       '{"branch":"feature-v8","version":{"from":"3.0.0","main":2,"to":"2.0.0"}}'
+    # then valid instanced pipeline url will be: '?vars.branch="feature-v8"&vars.version.from="3.0.0"&vars.version.main=2&vars.version.to="2.0.0"'
+        def flatten_json(raw_json):
+            out_json = {}
 
-    build_url = "{url}/{path}".format(
+            def flatten(x, name=''):
+                if type(x) is dict:
+                    for a in x:
+                        flatten(x[a], name + a + '.')
+                else:
+                    out_json[name[:-1]] = x
+            flatten(raw_json)
+            return out_json
+
+        instance_vars = json.loads(os.environ['BUILD_PIPELINE_INSTANCE_VARS'])
+        flat_json = flatten_json(instance_vars)
+        quoted_params = {}
+        for key in flat_json: 
+            quoted_params['vars.' + key] = '"{0}"'.format(flat_json[key]) if type(flat_json[key]) is str else flat_json[key]
+        maybe_url_params = '?{0}'.format(urlencode(quoted_params))
+
+    build_url = "{url}/{path}{params}".format(
         url=os.environ['ATC_EXTERNAL_URL'],
-        path=quote(build_path)
+        path=quote(build_path),
+        params=maybe_url_params
     )
 
 if debug:
