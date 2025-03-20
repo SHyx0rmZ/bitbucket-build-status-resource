@@ -53,8 +53,9 @@ HTTP 401 Unauthorized - Are your bitbucket credentials correct?
 
 ### `Bitbucket Server` Driver
 * `endpoint` - *Required*. URL to a Bitbucket Server instance.
-* `username` - *Required*. Login name of someone with rights to the repository which's build status should be updated.
-* `password` - *Required*. Password associated with that login.
+* `username` - *Required (if token is not set)*. Login name of someone with rights to the repository which's build status should be updated.
+* `password` - *Required (if token is not set)*. Password associated with that login.
+* `token` - *Optional*. Token to use with bearer-token auth. If set username and password are not required anymore.
 * `verify_ssl` - *Optional.* *Default: `true`.* When `false`, ignore any HTTPS connection errors if generated. Useful if on an internal network.
 * `bitbucket_url` - *Required*. **DEPRECATED. Use `endpoint` instead.** URL of the bitbucket instance, including a trailing slash.
 * `bitbucket_username` - *Required*. **DEPRECATED. Use `username` instead.** Login username of someone with rights to the repository being updated.
