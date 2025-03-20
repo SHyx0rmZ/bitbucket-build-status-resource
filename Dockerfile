@@ -11,7 +11,6 @@ RUN apk update --no-progress && \
         py3-pip \
         git \
         mercurial && \
-    pip3 install --upgrade pip && \
-    pip3 install 'requests>=2.8.1'
+    pip3 install --break-system-packages 'requests>=2.8.1'
 
 ADD scripts /opt/resource
